@@ -1,0 +1,9 @@
+databricks:
+  host: 'https://<>'
+  master_config: 
+    warehouse_id: '<Warehouse ID>'
+    catalog: '<your catalog>'
+    schema: '<your schema>'
+  api_prefix : '/api/2.0/genie/spaces'
+  retry_delay : 1
+  max_retries : 5

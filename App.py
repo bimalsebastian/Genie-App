@@ -4,40 +4,28 @@ from gradio.themes.utils import sizes
 from databricks.sdk import WorkspaceClient
 import json
 import time
-from datetime import datetime
-import argparse
+from datetime import datetime 
 import pandas as pd
+import yaml
 
-api_prefix = "/api/2.0/genie/spaces"
-max_retries = 300
-retry_delay = 1
-conversation_id = None
+with open('app.yaml', 'r') as config_file:
+    config = yaml.safe_load(config_file)
+
+
+api_prefix = config['databricks']['api_prefix']
+max_retries = config['databricks']['max_retries']
+retry_delay = config['databricks']['retry_delay']
 new_line = "\r\n"
-databricks_host = 'https://e2-demo-field-eng.cloud.databricks.com'
-anthropic_api_key = ''
-master_config_space_id = '01ef8257fee71b5c9782d4a90dd6745c'
+databricks_host = config['databricks']['host']
+master_config_space_id = config['databricks']['master_config']['space_id']
+master_config_warehouse_id = config['databricks']['master_config']['warehouse_id']
+master_config_catalog = config['databricks']['master_config']['catalog']
+master_config_schema = config['databricks']['master_config']['schema']
 globals()["space_dict_list"] = {}
 
-def get_genie_space_id(token, message):
-    w = WorkspaceClient(host = databricks_host,token=token)
-    path = f"{api_prefix}/{master_config_space_id}/start-conversation"
-    resp = w.api_client.do(
-        method="POST",
-        path=path,
-        headers={"Content-Type": "application/json"},
-        body={"content": f'if i were to ask this question: "{message}", find the genie space id where it is most likely to have the answer if you were to look into the data_set_explanation column'},
-    )
-    conversation_id = resp["conversation_id"]
-    try:
-        message_id = resp["message_id"]
-    except:
-        message_id = resp["id"]
-    
-    resp,result = get_genie_response(w,conversation_id, message_id, master_config_space_id)
-    # columns = resp["statement_response"]["manifest"]["schema"]["columns"]
-    # output = resp["statement_response"]["result"]
-    space_id = resp["statement_response"]["result"]['data_typed_array'][0]['values'][0]['str']
-    return space_id
+
+
+
 
 def get_genie_space_id_statement(token, message):
     w = WorkspaceClient(host = databricks_host,token=token)
@@ -49,10 +37,10 @@ def get_genie_space_id_statement(token, message):
     # Execute the statement
     try:
         result = w.statement_execution.execute_statement(
-                catalog = "bimal_demo",
-                schema = "alex_test",
+                catalog = master_config_catalog,
+                schema = master_config_schema,
                 statement=statement,
-                warehouse_id="475b94ddc7cd5211"
+                warehouse_id=master_config_warehouse_id
             )
         _space_dict_list = [{'space_id':x[0], 'space_name':x[1], 'conversation_id': None, 'isCurrent': True} for x in result.result.data_array]
 
