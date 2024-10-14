@@ -1,9 +1,9 @@
 databricks:
-  host: 'https://<>'
+  host: 'https://e2-demo-field-eng.cloud.databricks.com'
   master_config: 
-    warehouse_id: '<Warehouse ID>'
-    catalog: '<your catalog>'
-    schema: '<your schema>'
+    warehouse_id: '475b94ddc7cd5211'
+    catalog: 'bimal_demo'
+    schema: 'alex_test'
   api_prefix : '/api/2.0/genie/spaces'
   retry_delay : 1
   max_retries : 5
